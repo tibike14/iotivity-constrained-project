@@ -11,3 +11,7 @@ git clone https://github.com/01org/tinycbor.git deps/tinycbor -b v0.4
 place the server&client files to iotivity-constrained/apps 
 
 update Makefile (located in iotivity-constrained/port/linux )
+
+Build: 
+cd iotivity-constrained/port/linux 
+make 

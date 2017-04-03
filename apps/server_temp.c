@@ -56,7 +56,7 @@ app_init(void)
 //COLLECTING ACTUAL DATA FROM SENSOR..coming soon.. 
 
 
-
+//baszdmeg ird mar at te szemetparaszt... 
 
 static void
 get_temperature(oc_request_t *request, oc_interface_mask_t interface, void *user_data)
@@ -82,7 +82,7 @@ get_temperature(oc_request_t *request, oc_interface_mask_t interface, void *user
   oc_rep_end_root_object();
   oc_send_response(request, OC_STATUS_OK);
   PRINT("Temperature state %d\n", temp_state);
-	PRINT("Temperature value %d\n", temp_value);
+	PRINT("Temperature value %0.1f\n", temp_value);
 }
 
 

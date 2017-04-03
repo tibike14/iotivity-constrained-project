@@ -54,10 +54,7 @@ ifeq ($(IPV4),1)
 	CFLAGS += -DOC_IPV4
 endif
 
-SAMPLES = server client temp_sensor simpleserver simpleclient client_collections_linux \
-	  server_collections_linux server_block_linux client_block_linux \
-		light_service light_client \
-	  	temperature_service server_temp client_temp_get client_temp_observe \
+SAMPLES = server_temp client_temp_get client_temp_observe \
 		server_light client_light \
 		server_motion client_motion
 
@@ -105,8 +102,9 @@ libiotivity-constrained-client-server.a: $(OBJ_COMMON) $(OBJ_CLIENT_SERVER)
 libiotivity-constrained-client-server.so: $(OBJ_COMMON) $(OBJ_CLIENT_SERVER)
 	$(CC) -shared -o $@ $(OBJ_COMMON) $(OBJ_CLIENT_SERVER) $(LIBS)
 
-server: libiotivity-constrained-server.a
-	${CC} -o $@ ../../apps/server_linux.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
+#server: libiotivity-constrained-server.a
+#	${CC} -o $@ ../../apps/server_linux.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
+
 #NEW SERVERS:
 server_temp: libiotivity-constrained-server.a
 	${CC} -o $@ ../../apps/server_temp.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
@@ -116,8 +114,8 @@ server_motion: libiotivity-constrained-server.a
 	${CC} -o $@ ../../apps/motion_service.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
 
 
-client: libiotivity-constrained-client.a
-	${CC} -o $@ ../../apps/client_linux.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}
+#client: libiotivity-constrained-client.a
+#	${CC} -o $@ ../../apps/client_linux.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}
 
 #NEW CLIENTS: 
 client_temp_get: libiotivity-constrained-client.a
@@ -130,41 +128,22 @@ client_motion: libiotivity-constrained-client.a
 	${CC} -o $@ ../../apps/motion_client.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}
 
 
-temp_sensor: libiotivity-constrained-client.a
-	${CC} -o $@ ../../apps/temp_sensor_client_linux.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}
+#temp_sensor: libiotivity-constrained-client.a
+#	${CC} -o $@ ../../apps/temp_sensor_client_linux.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}
 
 #NEW SERVICES from simpleservice.c: 
-simpleserver: libiotivity-constrained-server.a
-	${CC} -o $@ ../../apps/simpleserver.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS}  ${LIBS}
-
-light_service: libiotivity-constrained-server.a
-	${CC} -o $@ ../../apps/light_service.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS}  ${LIBS}
-temperature_service: libiotivity-constrained-server.a
-	${CC} -o $@ ../../apps/temperature_service.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS}  ${LIBS}
+#light_service: libiotivity-constrained-server.a
+#	${CC} -o $@ ../../apps/light_service.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS}  ${LIBS}
+#temperature_service: libiotivity-constrained-server.a
+#	${CC} -o $@ ../../apps/temperature_service.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS}  ${LIBS}
 
 
 
 #NEW CLIENTS from simplesclient.c:
-simpleclient: libiotivity-constrained-client.a
-	${CC} -o $@ ../../apps/simpleclient.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS}  ${LIBS}
-
-light_client: libiotivity-constrained-client.a
-	${CC} -o $@ ../../apps/light_client.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS}  ${LIBS}
+#light_client: libiotivity-constrained-client.a
+#	${CC} -o $@ ../../apps/light_client.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS}  ${LIBS}
 #temperature_client: libiotivity-constrained-client.a
 #	${CC} -o $@ ../../apps/temperature_client.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS}  ${LIBS}
-
-
-client_collections_linux: libiotivity-constrained-client.a
-	${CC} -o $@ ../../apps/client_collections_linux.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS}  ${LIBS}
-
-server_collections_linux: libiotivity-constrained-server.a
-	${CC} -o $@ ../../apps/server_collections_linux.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
-
-client_block_linux: libiotivity-constrained-client.a
-	${CC} -o $@ ../../apps/client_block_linux.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS}  ${LIBS}
-
-server_block_linux: libiotivity-constrained-server.a
-	${CC} -o $@ ../../apps/server_block_linux.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
 
 iotivity-constrained-server.pc: iotivity-constrained-server.pc.in
 	$(SED) > $@ < $< \

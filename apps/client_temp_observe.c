@@ -72,6 +72,7 @@ stop_observe(void *data)
 static void
 observe_temperature(oc_client_response_t *data)
 {
+	int i;
   PRINT("OBSERVE_temperature:\n");
   oc_rep_t *rep = data->payload;
   while (rep != NULL) {
@@ -81,20 +82,26 @@ observe_temperature(oc_client_response_t *data)
       	PRINT("%d\n", rep->value.boolean);
       	temp_state = rep->value.boolean;
       	break;
-	case INT: 
-		//PRINT("INTEGER CASE...");
-		PRINT("%d\n", rep->value.integer);
-		temp_value = rep->value.integer;
+	case DOUBLE: 
+		PRINT("%.1f\n", rep->value.double_p);
+		temp_value = rep->value.double_p;
 		break;
 	case STRING:
      	PRINT("%s\n", oc_string(rep->value.string));
    	 	if (oc_string_len(name))
         	oc_free_string(&name);
       	oc_new_string(&name, oc_string(rep->value.string), oc_string_len(rep->value.string));
-      break;
-
+      	break;
+	case INT_ARRAY:{
+		int *arr = oc_int_array(rep->value.array);
+      		for (i = 0; i < (int)oc_int_array_size(rep->value.array); i++) {       			
+				PRINT("(%d)", arr[i]);
+      		}
+      		PRINT("\n");
+		}
+		break;
     default:
-      break;
+     	 break;
     }
     rep = rep->next;
   }

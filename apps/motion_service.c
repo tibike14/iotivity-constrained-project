@@ -27,12 +27,15 @@ MOTION SENSOR (service)
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+#include "serial_read_motion.h"
 
 static pthread_mutex_t mutex;
 static pthread_cond_t cv;
 static struct timespec ts;
 static int quit = 0;
-static bool motion_state = true;
+bool motion_state;
 oc_string_t name;
 
 static void
@@ -54,21 +57,23 @@ app_init(void)
   return ret;
 }
 
-//COLLECTING ACTUAL DATA FROM SENSOR..coming soon.. 
-
-
 
 
 static void
 get_motion(oc_request_t *request, oc_interface_mask_t interface, void *user_data)
 {
+	int startup = 1;
   (void)user_data;
+
+  //motion_state = motion_read();
+  //PRINT("Mot_state: %d\n", motion_state);
+
   oc_rep_start_root_object();
   switch (interface) {
   case OC_IF_BASELINE:
     oc_process_baseline_interface(request->resource);
   case OC_IF_RW:
-	oc_rep_set_boolean(root, motion_state, motion_state);
+	oc_rep_set_boolean(root, motion_state, motion_state = motion_read());
 	oc_rep_set_text_string(root, name, oc_string(name));
     break;
   default:
@@ -112,6 +117,8 @@ handle_signal(int signal)
 int
 main(void)
 {
+
+
   int init;
   struct sigaction sa;
   sigfillset(&sa.sa_mask);
@@ -132,20 +139,37 @@ main(void)
   init = oc_main_init(&handler);
   if (init < 0)
     return init;
+  PRINT("1\n");
 
   while (quit != 1) {
-    next_event = oc_main_poll();	
+
+    next_event = oc_main_poll();
+    PRINT("2\n");
     pthread_mutex_lock(&mutex);
     if (next_event == 0) {
+    	 PRINT("3\n");
       pthread_cond_wait(&cv, &mutex);
     } else {
+    	 PRINT("4\n");
       ts.tv_sec = (next_event / OC_CLOCK_SECOND);
       ts.tv_nsec = (next_event % OC_CLOCK_SECOND) * 1.e09 / OC_CLOCK_SECOND;
       pthread_cond_timedwait(&cv, &mutex, &ts);
     }
+    PRINT("5\n");
     pthread_mutex_unlock(&mutex);
   }
-
+    PRINT("6\n");
   oc_main_shutdown();
   return 0;
 }
+
+
+
+
+
+
+
+
+
+
+

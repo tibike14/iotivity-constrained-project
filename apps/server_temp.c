@@ -16,6 +16,7 @@
 
 #include "oc_api.h"
 #include "port/oc_clock.h"
+#include "serial_read_temp.h"
 
 #include <pthread.h>
 #include <signal.h>
@@ -26,10 +27,9 @@ static pthread_cond_t cv;
 static struct timespec ts;
 static int quit = 0;
 static bool temp_state = true;
-//static int temp_value = 27;		//this is the measured value (in sp ecs only specified as number.. so in the future can be a float)
-static double temp_value = 25.5;
+float temp_value;
 
-static int range_array[2]={-10,50};	//range of the accepted temperature values (in the future need to be ensured to fall between this two, otherwise error 
+static int range_array[2]={-10,50};	//range of the accepted temperature values 
 oc_string_t unique_id;
 oc_string_t temp_unit;
 
@@ -47,7 +47,7 @@ app_init(void)
   ret |= oc_add_device("/oic/tempsensor1", "oic.d.temperature", "Room1 TempSensor", "1.0", "1.0",
                        set_device_custom_property, NULL);
 	
-	oc_new_string(&unique_id, "TempSensor_Room1", 16);	//This is what sent out as UniqueID of device?!
+	oc_new_string(&unique_id, "TempSensor_Room1", 16);	//This is what sent out as UniqueID of device
 	oc_new_string(&temp_unit, "C", 1);	//this is how I'm trying to specify the unit of the measured temperature 
 
   return ret;
@@ -56,7 +56,16 @@ app_init(void)
 //COLLECTING ACTUAL DATA FROM SENSOR..coming soon.. 
 
 
-//baszdmeg ird mar at te szemetparaszt... 
+
+/*
+float read_sensor()
+{
+	temp_value = serialReadTemp();
+	return temp_value;
+}
+*/
+
+
 
 static void
 get_temperature(oc_request_t *request, oc_interface_mask_t interface, void *user_data)
@@ -67,12 +76,11 @@ get_temperature(oc_request_t *request, oc_interface_mask_t interface, void *user
   case OC_IF_BASELINE:
     oc_process_baseline_interface(request->resource);
   case OC_IF_RW:
-    oc_rep_set_boolean(root, temp_state, temp_state);
-		//oc_rep_set_int(root, temp_value, temp_value);
-		oc_rep_set_double(root, temp_value, temp_value);
+	oc_rep_set_boolean(root, temp_state, temp_state);
+	oc_rep_set_double(root, temp_value, temp_value = serialReadTemp());
     	oc_rep_set_text_string(root, unique_id, oc_string(unique_id));
-		oc_rep_set_text_string(root, temp_unit, oc_string(temp_unit));
-		oc_rep_set_int_array(root, range, range_array, 2);
+	oc_rep_set_text_string(root, temp_unit, oc_string(temp_unit));
+	oc_rep_set_int_array(root, range, range_array, 2);
 
 
     break;
@@ -96,8 +104,6 @@ register_resources(void)
   oc_resource_set_discoverable(res, true);
   oc_resource_set_periodic_observable(res, 1);
   oc_resource_set_request_handler(res, OC_GET, get_temperature, NULL);
- // oc_resource_set_request_handler(res, OC_POST, post_light, NULL);
- // oc_resource_set_request_handler(res, OC_PUT, put_light, NULL);
   oc_add_resource(res);
 }
 

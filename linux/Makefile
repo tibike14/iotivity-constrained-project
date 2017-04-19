@@ -107,11 +107,15 @@ libiotivity-constrained-client-server.so: $(OBJ_COMMON) $(OBJ_CLIENT_SERVER)
 
 #NEW SERVERS:
 server_temp: libiotivity-constrained-server.a
-	${CC} -o $@ ../../apps/server_temp.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
+	${CC} -o $@ ../../apps/server_temp.c libiotivity-constrained-server.a ../../apps/serial_read_temp.c -DOC_SERVER ${CFLAGS} ${LIBS}
+
+#serial_read_temp:
+#	${CC} -o $@ ../../apps/serial_read_temp.c
+
 server_light: libiotivity-constrained-server.a
 	${CC} -o $@ ../../apps/server_light.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
 server_motion: libiotivity-constrained-server.a
-	${CC} -o $@ ../../apps/motion_service.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
+	${CC} -o $@ ../../apps/motion_service.c ../../apps/serial_read_motion.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
 
 
 #client: libiotivity-constrained-client.a

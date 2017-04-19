@@ -115,7 +115,7 @@ discovery(const char *di, const char *uri, oc_string_array_t types,
       motion_1[uri_len] = '\0';
       oc_do_observe(motion_1, &motion_sensor, NULL, &observe_motion, LOW_QOS,
                     NULL);
-      oc_set_delayed_callback(NULL, &stop_observe, 30);
+      //oc_set_delayed_callback(NULL, &stop_observe, 30);
       return OC_STOP_DISCOVERY;
     }
   }

@@ -47,23 +47,10 @@ app_init(void)
   ret |= oc_add_device("/oic/tempsensor1", "oic.d.temperature", "Room1 TempSensor", "1.0", "1.0",
                        set_device_custom_property, NULL);
 	
-	oc_new_string(&unique_id, "TempSensor_Room1", 16);	//This is what sent out as UniqueID of device
-	oc_new_string(&temp_unit, "C", 1);	//this is how I'm trying to specify the unit of the measured temperature 
-
+	oc_new_string(&unique_id, "TempSensor_Room1", 16);
+	oc_new_string(&temp_unit, "C", 1);
   return ret;
 }
-
-//COLLECTING ACTUAL DATA FROM SENSOR..coming soon.. 
-
-
-
-/*
-float read_sensor()
-{
-	temp_value = serialReadTemp();
-	return temp_value;
-}
-*/
 
 
 

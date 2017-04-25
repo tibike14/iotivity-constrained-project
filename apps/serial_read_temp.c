@@ -66,7 +66,7 @@ int serialOpen (const char *device, const int baud)
     options.c_cflag |= CS8 ;
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG) ;
     options.c_oflag &= ~OPOST ;
-	options.c_cflag &= ~HUPCL;	// disable hang-up-on-close to avoid reset ?! 
+	options.c_cflag &= ~HUPCL;
 
     options.c_cc [VMIN]  =   0 ;
     options.c_cc [VTIME] = 100 ;        // Ten seconds (100 deciseconds)
@@ -105,7 +105,7 @@ float serialReadTemp(void)
 	int nw;
 	int adc_value;
 
-    if ((fd = serialOpen ("/dev/ttyUSB0", 115200)) < 0)
+    if ((fd = serialOpen ("/dev/ttyUSB1", 115200)) < 0)
     {
 	    fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
         return 1 ;
@@ -118,21 +118,17 @@ float serialReadTemp(void)
 
 	usleep(3000);
 
-    n = read(fd, buf, 8);
+    n = read(fd, buf, 4);
 
 	adc_value = atoi(buf);
 	printf("the ADC value of temp: %d\n", adc_value);
 	
 	float voltage = adc_value / 204.8;
-	//temp_value = 
 	printf("votlage: %.2f\n", voltage);	
 
-	float temperatureC = (voltage - 0.5) * 100 ; // Converting to degrees
+	float temperatureC = (voltage - 0.5) * 100 ; // Converting to Celsius
 	printf("Temperature: %.2f\n", temperatureC);	
 
-    printf("%i bytes got read...\n", n);
-    /* print what's in the buffer */
-    printf("Buffer contains...\n%s\n", buf);
 
 	close(fd);
 

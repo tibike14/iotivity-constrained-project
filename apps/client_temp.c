@@ -18,8 +18,13 @@
 Temperature Sensor client: GET actual temperature value
 
 */
+/*
+#include "oc_base64.h"
+#include "oc_blockwise.h"
+#include "oc_buffer.h"
+#include "oc_client_state.h"
 
-
+*/
 #include "oc_api.h"
 #include "port/oc_clock.h"
 
@@ -27,16 +32,13 @@ Temperature Sensor client: GET actual temperature value
 #include <signal.h>
 #include <stdio.h>
 
-#include <wiringPi.h>
 
-
-#define HeatPin 7
-#define CoolPin 0
 
 static pthread_mutex_t mutex;
 static pthread_cond_t cv;
 static struct timespec ts;
 static int quit = 0;
+double ref_value = 33.3;
 
 static void
 set_device_custom_property(void *data)
@@ -58,161 +60,52 @@ app_init(void)
 static char temperature[MAX_URI_LENGTH];
 static oc_server_handle_t temperature_server;
 static bool temp_state;
-//static int temp_value;
 double temp_value;
-double temp;
 
 static oc_string_t name;
-//int range_array[2];
 int received_range_array[2];
-
-/*
-float iotivity_read_temp(oc_client_response_t *data)
-{
-	oc_rep_t *rep = data->payload;
-	while(rep != NULL) {
-		PRINT("%.1f\n", rep->value.double_p);
-		temp = rep->value.double_p;
-	}
-	//rep = rep->next;
-}
-
-
-*/
-/*
-void iotivity_control_temp(void)
-{
-	static char temp_uri[18]="oic.r.temperature\0";
-
-	oc_do_get(temp_uri, &temperature_server, NULL, &iotivity_read_temp, LOW_QOS, NULL);
-
-}
-*/
-
-
-
-void heatOn(void){
-	digitalWrite(HeatPin, HIGH);
-	digitalWrite(CoolPin, LOW);
-}
-void heatOff(void){
-	digitalWrite(HeatPin, LOW);
-	digitalWrite(CoolPin, LOW);
-}
-void coolOn(void){
-	digitalWrite(HeatPin, LOW);
-	digitalWrite(CoolPin, HIGH);
-}
 
 
 static void
 get_temperature(oc_client_response_t *data)
 {
 	int i;
-  PRINT("GET_temperature_value:\n");
+  //PRINT("GET_temperature_value:\n");
   oc_rep_t *rep = data->payload;
   while (rep != NULL) {
-  	PRINT("key %s: ", oc_string(rep->name));
+  	//PRINT("key %s: ", oc_string(rep->name));
     switch (rep->type) {
     case BOOL:
-      PRINT("%d\n", rep->value.boolean);
+      //PRINT("%d\n", rep->value.boolean);
       temp_state = rep->value.boolean;
       break;
 	case DOUBLE:
-		//PRINT("INTEGER CASE: ");
-		PRINT("%.1f\n", rep->value.double_p);
+		//PRINT("%.1f\n", rep->value.double_p);
 		temp_value = rep->value.double_p;
 		break;
     case STRING:
-      PRINT("%s\n", oc_string(rep->value.string));
+      //PRINT("%s\n", oc_string(rep->value.string));
       if (oc_string_len(name))
-        oc_free_string(&name);
-      	oc_new_string(&name, oc_string(rep->value.string), oc_string_len(rep->value.string));
+    	  oc_free_string(&name);
+      oc_new_string(&name, oc_string(rep->value.string), oc_string_len(rep->value.string));
       break;
     case INT_ARRAY:{
-			//PRINT("INT ARRAY: ");
-			//PRINT("%d\n", rep->value.array);
-			int *arr = oc_int_array(rep->value.array);
+    	//PRINT("%d\n", rep->value.array);
+    	int *arr = oc_int_array(rep->value.array);
    		for (i = 0; i < (int)oc_int_array_size(rep->value.array); i++) {
-				PRINT("(%d)", arr[i]);
-      }
-
-      PRINT("\n");
-		}
-		break;
-
+   			//PRINT("(%d)", arr[i]);
+   		}
+      //PRINT("\n");
+    }
+      break;
     default:
       break;
-    }
+    }	//EOSwitch-case
   rep = rep->next;
-  }
-    double ref_temp = 50.5;
 
+  } //EOwhile
 
-    if (temp_value != ref_temp){
-    	control_temperature(temp_value, ref_temp);
-    }
-
-
-
-
-
-/*
-	while(temp_value < ref_value) {
-		heatOn();
-		printf("heating process: %.1f\n", temp_value);
-		oc_do_get
-
-
-
-
-    if (temp_value < ref_temp) {
-    	heatOn();
-	printf("..new temp value (heating process): %.1f\n", temp_value);
-//    	delay(1000);
-    	oc_do_get(temperature, &temperature_server, NULL, &get_temperature, LOW_QOS, NULL);
-    }
-    else if (temp_value > ref_temp){
-    	coolOn();
-	printf("..new temp value (cooling process): %.1f\n", temp_value);
-//    	delay(1000);
-    	oc_do_get(temperature, &temperature_server, NULL, &get_temperature, LOW_QOS, NULL);
-    }
-    else
-    	heatOff();
-
-   // rep = rep->next;
-    *
-    *
-    */
-
-}	//end of get_temperature function
-
-
-void control_temperature(double temp_value, double ref_temp)
-{
-	if (temp_value < ref_temp){
-		heatOn();
-		printf("ctrl_temp_loop (heating process): %.2f\n", temp_value);
-		oc_do_get(temperature, &temperature_server, NULL, &get_temperature, LOW_QOS, NULL);
-	}
-	/*
-	else if (temp_value > ref_value){
-		coolOn();
-		printf("ctrl_temp_loop (heating process): %.2f\n", temp_value);
-		oc_do_get(temperature, &temperature_server, NULL, &get_temperature, LOW_QOS, NULL);
-	}
-	*/
-	else
-		printf("temp_ctrl is FINISHED...\n");
-
-}
-
-
-
-
-
-
+}	//EOF
 
 
 static oc_discovery_flags_t
@@ -223,7 +116,6 @@ discovery(const char *di, const char *uri, oc_string_array_t types,
   (void)di;
   (void)interfaces;
   (void)user_data;
-	PRINT("discovery start\n");
   int i;
   int uri_len = strlen(uri);
   uri_len = (uri_len >= MAX_URI_LENGTH) ? MAX_URI_LENGTH - 1 : uri_len;
@@ -237,19 +129,15 @@ discovery(const char *di, const char *uri, oc_string_array_t types,
       temperature[uri_len] = '\0';
       oc_do_get(temperature, &temperature_server, NULL, &get_temperature, LOW_QOS, NULL);
      // oc_set_delayed_callback(NULL, &stop_observe, 30);
-      printf("is it returning where it was called from ?! \n");
-      //oc_do_get(temperature, &temperature_server, NULL, &control_temperature, LOW_QOS, NULL);
-
       return OC_STOP_DISCOVERY;
     }
   }
   return OC_CONTINUE_DISCOVERY;
 }	//end of disocvery function
 
-static void
+
 issue_requests(void)
 {
-	//PRINT("issue request..\n");
   oc_do_ip_discovery("oic.r.temperature", &discovery, NULL);
 }
 
@@ -269,15 +157,9 @@ handle_signal(int signal)
   quit = 1;
 }
 
-int
-main(void)
+
+int main(void)
 {
-
-	wiringPiSetup();
-
-	pinMode(HeatPin, OUTPUT);
-	pinMode(CoolPin, OUTPUT);
-
 
   int init;
   struct sigaction sa;
@@ -296,24 +178,45 @@ main(void)
   oc_storage_config("./creds");
 #endif /* OC_SECURITY */
 
+  OC_DBG("BEFORE INIT \n\n\n");
+
   init = oc_main_init(&handler);
   if (init < 0)
     return init;
 
+  OC_DBG("AFTER INIT \n\n\n");
+
+
   while (quit != 1) {
-    next_event = oc_main_poll();
-    pthread_mutex_lock(&mutex);
-    if (next_event == 0) {
-      pthread_cond_wait(&cv, &mutex);
-    } else {
-      ts.tv_sec = (next_event / OC_CLOCK_SECOND);
-      ts.tv_nsec = (next_event % OC_CLOCK_SECOND) * 1.e09 / OC_CLOCK_SECOND;
-      pthread_cond_timedwait(&cv, &mutex, &ts);
-    }
-    pthread_mutex_unlock(&mutex);
-  }
+
+      next_event = oc_main_poll();
+      OC_DBG("POLL HAPPENED.. \n");
+      pthread_mutex_lock(&mutex);
+      if (next_event == 0) {
+      	OC_DBG("NO NEXT EVEN.. WAITING..\n");
+      	quit = 1;
+        //pthread_cond_wait(&cv, &mutex);
+      	// pthread_mutex_unlock(&mutex);
+      	//return temp_value;
+      } else {
+        ts.tv_sec = (next_event / OC_CLOCK_SECOND);
+        ts.tv_nsec = (next_event % OC_CLOCK_SECOND) * 1.e09 / OC_CLOCK_SECOND;
+        OC_DBG("COND WAIT\n");
+        pthread_cond_timedwait(&cv, &mutex, &ts);
+      }
+      OC_DBG("MUTEX UNLOCK\n");
+      pthread_mutex_unlock(&mutex);
+
+      PRINT("TEMP: %.1f\n", temp_value);
+      if (temp_value != 0.0){
+    	//  PRINT("not zero..\n");
+    	  PRINT("%.1f\n", temp_value);
+      }
+  }	// end of while()
+
 
   oc_main_shutdown();
+  //return temp_value;
   return 0;
 }	//end of main 
 

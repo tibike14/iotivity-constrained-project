@@ -35,7 +35,7 @@ OBJ_CLIENT=$(addprefix obj/client/,$(notdir $(SRC:.c=.o)))
 OBJ_SERVER=$(addprefix obj/server/,$(notdir $(SRC:.c=.o)))
 OBJ_CLIENT_SERVER=$(addprefix obj/client_server/,$(notdir $(SRC:.c=.o)))
 VPATH=../../messaging/coap/:../../util/:../../api/:../../deps/tinycbor/src/:
-LIBS?= -lm -pthread -lrt
+LIBS?= -lm -pthread -lrt -lwiringPi
 
 ifeq ($(DEBUG),1)
 	CFLAGS += -DOC_DEBUG -g -O0
@@ -54,7 +54,7 @@ ifeq ($(IPV4),1)
 	CFLAGS += -DOC_IPV4
 endif
 
-SAMPLES = server_temp client_temp_get client_temp_observe \
+SAMPLES = server_temp client_temp_get client_temp_observe client_temp tempcontrol\
 		server_light client_light \
 		server_motion client_motion
 
@@ -109,9 +109,6 @@ libiotivity-constrained-client-server.so: $(OBJ_COMMON) $(OBJ_CLIENT_SERVER)
 server_temp: libiotivity-constrained-server.a
 	${CC} -o $@ ../../apps/server_temp.c libiotivity-constrained-server.a ../../apps/serial_read_temp.c -DOC_SERVER ${CFLAGS} ${LIBS}
 
-#serial_read_temp:
-#	${CC} -o $@ ../../apps/serial_read_temp.c
-
 server_light: libiotivity-constrained-server.a
 	${CC} -o $@ ../../apps/server_light.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS} ${LIBS}
 server_motion: libiotivity-constrained-server.a
@@ -122,6 +119,13 @@ server_motion: libiotivity-constrained-server.a
 #	${CC} -o $@ ../../apps/client_linux.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}
 
 #NEW CLIENTS: 
+tempcontrol:
+	${CC} -o $@ ../../apps/temperature_control.c ${CFLAGS} ${LIBS}
+
+client_temp: libiotivity-constrained-client.a
+	${CC} -o $@ ../../apps/client_temp.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}
+
+
 client_temp_get: libiotivity-constrained-client.a
 	${CC} -o $@ ../../apps/client_temp_get.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}
 client_temp_observe: libiotivity-constrained-client.a
@@ -135,19 +139,6 @@ client_motion: libiotivity-constrained-client.a
 #temp_sensor: libiotivity-constrained-client.a
 #	${CC} -o $@ ../../apps/temp_sensor_client_linux.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}
 
-#NEW SERVICES from simpleservice.c: 
-#light_service: libiotivity-constrained-server.a
-#	${CC} -o $@ ../../apps/light_service.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS}  ${LIBS}
-#temperature_service: libiotivity-constrained-server.a
-#	${CC} -o $@ ../../apps/temperature_service.c libiotivity-constrained-server.a -DOC_SERVER ${CFLAGS}  ${LIBS}
-
-
-
-#NEW CLIENTS from simplesclient.c:
-#light_client: libiotivity-constrained-client.a
-#	${CC} -o $@ ../../apps/light_client.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS}  ${LIBS}
-#temperature_client: libiotivity-constrained-client.a
-#	${CC} -o $@ ../../apps/temperature_client.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS}  ${LIBS}
 
 iotivity-constrained-server.pc: iotivity-constrained-server.pc.in
 	$(SED) > $@ < $< \

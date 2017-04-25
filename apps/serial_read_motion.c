@@ -107,9 +107,8 @@ int motion_read(void)
         int n;
         int i;
         int buf[8];
-		//bool state = false;
 
-        if ((fd = serialOpen ("/dev/ttyUSB1", 115200)) < 0)
+        if ((fd = serialOpen ("/dev/ttyUSB0", 115200)) < 0)
         {
         fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
         return 1 ;

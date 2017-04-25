@@ -3,7 +3,6 @@ SED = sed
 INSTALL = install
 
 DESTDIR ?= /usr/local
-#DESTDIR ?= /home/tibike/constrainedIoTivity
 install_bin_dir?=${DESTDIR}/opt/iotivity-constrained/bin/
 prefix = $(DESTDIR)
 exec_prefix = $(prefix)

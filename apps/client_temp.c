@@ -15,16 +15,9 @@
 */
 
 /*  
-Temperature Sensor client: GET actual temperature value
-
+Temperature Sensor client
 */
-/*
-#include "oc_base64.h"
-#include "oc_blockwise.h"
-#include "oc_buffer.h"
-#include "oc_client_state.h"
 
-*/
 #include "oc_api.h"
 #include "port/oc_clock.h"
 
@@ -38,7 +31,6 @@ static pthread_mutex_t mutex;
 static pthread_cond_t cv;
 static struct timespec ts;
 static int quit = 0;
-double ref_value = 33.3;
 
 static void
 set_device_custom_property(void *data)
@@ -178,26 +170,17 @@ int main(void)
   oc_storage_config("./creds");
 #endif /* OC_SECURITY */
 
-  OC_DBG("BEFORE INIT \n\n\n");
-
   init = oc_main_init(&handler);
   if (init < 0)
     return init;
 
-  OC_DBG("AFTER INIT \n\n\n");
-
-
   while (quit != 1) {
-
       next_event = oc_main_poll();
       OC_DBG("POLL HAPPENED.. \n");
       pthread_mutex_lock(&mutex);
       if (next_event == 0) {
-      	OC_DBG("NO NEXT EVEN.. WAITING..\n");
+    	PRINT("%.1f\n", temp_value);
       	quit = 1;
-        //pthread_cond_wait(&cv, &mutex);
-      	// pthread_mutex_unlock(&mutex);
-      	//return temp_value;
       } else {
         ts.tv_sec = (next_event / OC_CLOCK_SECOND);
         ts.tv_nsec = (next_event % OC_CLOCK_SECOND) * 1.e09 / OC_CLOCK_SECOND;
@@ -207,16 +190,8 @@ int main(void)
       OC_DBG("MUTEX UNLOCK\n");
       pthread_mutex_unlock(&mutex);
 
-      PRINT("TEMP: %.1f\n", temp_value);
-      if (temp_value != 0.0){
-    	//  PRINT("not zero..\n");
-    	  PRINT("%.1f\n", temp_value);
-      }
   }	// end of while()
-
-
   oc_main_shutdown();
-  //return temp_value;
   return 0;
 }	//end of main 
 

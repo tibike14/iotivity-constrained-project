@@ -15,7 +15,7 @@
 */
 
 /*
-MOTION SENSOR (service) 
+MOTION SENSOR
 
 */
 
@@ -64,9 +64,6 @@ get_motion(oc_request_t *request, oc_interface_mask_t interface, void *user_data
 {
 	int startup = 1;
   (void)user_data;
-
-  //motion_state = motion_read();
-  //PRINT("Mot_state: %d\n", motion_state);
 
   oc_rep_start_root_object();
   switch (interface) {

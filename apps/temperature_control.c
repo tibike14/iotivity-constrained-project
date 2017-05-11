@@ -47,8 +47,8 @@ int main(void)
 	char *cmd = "./client_temp";
 	char buf[BUFSIZE];
 	FILE *fp;
-	float temp_value;
-	float ref_temp = 33.3;
+	float tempValue;
+	float refTemp = 33.3;
 
 	while(1){
 		if ((fp = popen(cmd, "r")) == NULL) {
@@ -58,8 +58,8 @@ int main(void)
 
 		while (fgets(buf, BUFSIZE, fp) != NULL) {
 				//printf("OUTPUT: %s", buf);
-				temp_value = atof(buf);
-				printf("%.1f\n", temp_value);
+				tempValue = atof(buf);
+				printf("%.1f\n", tempValue);
 
 		}
 
@@ -68,11 +68,11 @@ int main(void)
 				return -1;
 		}
 
-		if (temp_value < ref_temp) {
+		if (tempValue < refTemp) {
 			printf("heating process..\n");
 			heat_on();
 		}
-		else if (temp_value > ref_temp) {
+		else if (tempValue > refTemp) {
 			printf("cooling process..\n");
 			cool_on();
 		}

@@ -61,7 +61,7 @@ static oc_event_callback_retval_t
 stop_observe(void *data)
 {
   (void)data;
-  PRINT("Stopping OBSERVE\n");
+//  PRINT("Stopping OBSERVE\n");
   oc_stop_observe(motion_1, &motion_sensor);
   return DONE;
 }
@@ -70,17 +70,17 @@ stop_observe(void *data)
 static void
 observe_motion(oc_client_response_t *data)
 {
-  PRINT("OBSERVE_motion:\n");
+//  PRINT("OBSERVE_motion:\n");
   oc_rep_t *rep = data->payload;
   while (rep != NULL) {
-    PRINT("key %s, value ", oc_string(rep->name));
+//    PRINT("key %s, value ", oc_string(rep->name));
     switch (rep->type) {
     case BOOL:
-      	PRINT("%d\n", rep->value.boolean);
+//      	PRINT("%d\n", rep->value.boolean);
       	motion_state = rep->value.boolean;
       	break;
 	case STRING:
-     	PRINT("%s\n", oc_string(rep->value.string));
+//     	PRINT("%s\n", oc_string(rep->value.string));
    	 	if (oc_string_len(name))
         	oc_free_string(&name);
       	oc_new_string(&name, oc_string(rep->value.string), oc_string_len(rep->value.string));
@@ -91,7 +91,7 @@ observe_motion(oc_client_response_t *data)
     }
     rep = rep->next;
   }
-}	//end of observe_motion function
+}	//EOF
 
 static oc_discovery_flags_t
 discovery(const char *di, const char *uri, oc_string_array_t types,
@@ -101,7 +101,7 @@ discovery(const char *di, const char *uri, oc_string_array_t types,
   (void)di;
   (void)interfaces;
   (void)user_data;
-	PRINT("discovery start\n");
+//	PRINT("discovery start\n");
   int i;
   int uri_len = strlen(uri);
   uri_len = (uri_len >= MAX_URI_LENGTH) ? MAX_URI_LENGTH - 1 : uri_len;
@@ -113,19 +113,18 @@ discovery(const char *di, const char *uri, oc_string_array_t types,
 
       strncpy(motion_1, uri, uri_len);
       motion_1[uri_len] = '\0';
-      oc_do_observe(motion_1, &motion_sensor, NULL, &observe_motion, LOW_QOS,
+      oc_do_get(motion_1, &motion_sensor, NULL, &observe_motion, LOW_QOS,
                     NULL);
       //oc_set_delayed_callback(NULL, &stop_observe, 30);
       return OC_STOP_DISCOVERY;
     }
   }
   return OC_CONTINUE_DISCOVERY;
-}	//end of discovery function
+}	//EOF
 
 static void
 issue_requests(void)
 {
-	PRINT("issue request..\n");
   oc_do_ip_discovery("oic.r.sensor.motion", &discovery, NULL);
 }
 
@@ -173,18 +172,23 @@ main(void)
     next_event = oc_main_poll();
     pthread_mutex_lock(&mutex);
     if (next_event == 0) {
-      pthread_cond_wait(&cv, &mutex);
+      //pthread_cond_wait(&cv, &mutex);
+    	PRINT("%d", motion_state);
+    	quit = 1;
     } else {
       ts.tv_sec = (next_event / OC_CLOCK_SECOND);
       ts.tv_nsec = (next_event % OC_CLOCK_SECOND) * 1.e09 / OC_CLOCK_SECOND;
       pthread_cond_timedwait(&cv, &mutex, &ts);
     }
     pthread_mutex_unlock(&mutex);
+
+    //PRINT("%d", motion_state);
+
   }
 
   oc_main_shutdown();
   return 0;
-}	//END OF MAIN
+}	//EOF
 
 
 

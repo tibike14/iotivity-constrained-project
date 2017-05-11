@@ -53,8 +53,8 @@ ifeq ($(IPV4),1)
 	CFLAGS += -DOC_IPV4
 endif
 
-SAMPLES = server_temp client_temp_get client_temp_observe client_temp tempcontrol\
-		server_light client_light \
+SAMPLES = server_temp client_temp_get client_temp_observe client_temp tempcontrol \
+		server_light client_light lightcontrol \
 		server_motion client_motion
 
 CONSTRAINED_LIBS = libiotivity-constrained-server.a libiotivity-constrained-client.a \
@@ -120,6 +120,8 @@ server_motion: libiotivity-constrained-server.a
 #NEW CLIENTS: 
 tempcontrol:
 	${CC} -o $@ ../../apps/temperature_control.c ${CFLAGS} ${LIBS}
+lightcontrol:
+	${CC} -o $@ ../../apps/light_control.c ${CFLAGS} ${LIBS}
 
 client_temp: libiotivity-constrained-client.a
 	${CC} -o $@ ../../apps/client_temp.c libiotivity-constrained-client.a -DOC_CLIENT ${CFLAGS} ${LIBS}

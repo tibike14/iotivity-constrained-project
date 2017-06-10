@@ -9,9 +9,9 @@
 #define HeatPin3 3
 #define CoolPin 0
 
-void init(void);
+//void init(void);
 void heat_on(void);
-void heat_off(void);
+void switch_off(void);
 void cool_on(void);
 
 #endif

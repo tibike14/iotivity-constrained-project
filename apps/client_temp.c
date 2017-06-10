@@ -52,7 +52,7 @@ app_init(void)
 static char temperature[MAX_URI_LENGTH];
 static oc_server_handle_t temperature_server;
 static bool temp_state;
-double temp_value;
+double temp_value = -1;
 
 static oc_string_t name;
 int received_range_array[2];
@@ -125,7 +125,7 @@ discovery(const char *di, const char *uri, oc_string_array_t types,
     }
   }
   return OC_CONTINUE_DISCOVERY;
-}	//end of disocvery function
+}
 
 
 issue_requests(void)
@@ -176,7 +176,6 @@ int main(void)
 
   while (quit != 1) {
       next_event = oc_main_poll();
-      OC_DBG("POLL HAPPENED.. \n");
       pthread_mutex_lock(&mutex);
       if (next_event == 0) {
     	PRINT("%.1f\n", temp_value);
@@ -184,10 +183,8 @@ int main(void)
       } else {
         ts.tv_sec = (next_event / OC_CLOCK_SECOND);
         ts.tv_nsec = (next_event % OC_CLOCK_SECOND) * 1.e09 / OC_CLOCK_SECOND;
-        OC_DBG("COND WAIT\n");
         pthread_cond_timedwait(&cv, &mutex, &ts);
       }
-      OC_DBG("MUTEX UNLOCK\n");
       pthread_mutex_unlock(&mutex);
 
   }	// end of while()

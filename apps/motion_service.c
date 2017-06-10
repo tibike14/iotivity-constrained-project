@@ -35,7 +35,7 @@ static pthread_mutex_t mutex;
 static pthread_cond_t cv;
 static struct timespec ts;
 static int quit = 0;
-bool motion_state;
+int motion_state = -1;
 oc_string_t name;
 
 static void
@@ -52,7 +52,7 @@ app_init(void)
   ret |= oc_add_device("/oic/motionsensor1", "oic.d.motionsensor", "Room1 MotionSensor1", "1.0", "1.0",
                        set_device_custom_property, NULL);
 	
-	oc_new_string(&name, "Room1_MotionSensor1", 19);	//This is what sent out as UniqueID of device?!
+	oc_new_string(&name, "Room1_MotionSensor1", 19);
 
   return ret;
 }
@@ -70,7 +70,7 @@ get_motion(oc_request_t *request, oc_interface_mask_t interface, void *user_data
   case OC_IF_BASELINE:
     oc_process_baseline_interface(request->resource);
   case OC_IF_RW:
-	oc_rep_set_boolean(root, motion_state, motion_state = motion_read());
+	oc_rep_set_int(root, motion_state, motion_state = motion_read());
 	oc_rep_set_text_string(root, name, oc_string(name));
     break;
   default:
@@ -114,8 +114,6 @@ handle_signal(int signal)
 int
 main(void)
 {
-
-
   int init;
   struct sigaction sa;
   sigfillset(&sa.sa_mask);
@@ -136,26 +134,20 @@ main(void)
   init = oc_main_init(&handler);
   if (init < 0)
     return init;
-  PRINT("1\n");
 
   while (quit != 1) {
 
     next_event = oc_main_poll();
-    PRINT("2\n");
     pthread_mutex_lock(&mutex);
     if (next_event == 0) {
-    	 PRINT("3\n");
       pthread_cond_wait(&cv, &mutex);
     } else {
-    	 PRINT("4\n");
       ts.tv_sec = (next_event / OC_CLOCK_SECOND);
       ts.tv_nsec = (next_event % OC_CLOCK_SECOND) * 1.e09 / OC_CLOCK_SECOND;
       pthread_cond_timedwait(&cv, &mutex, &ts);
     }
-    PRINT("5\n");
     pthread_mutex_unlock(&mutex);
   }
-    PRINT("6\n");
   oc_main_shutdown();
   return 0;
 }

@@ -116,11 +116,12 @@ int motion_read(void)
         //tcflush(fd, TCIFLUSH);
 
 	//for (;;){
-			n = read(fd, buf, 1);
+			n = read(fd, buf, 4);
 
 			int int_value = atoi(buf);
 
-			printf("value of the read-in: %d\n", int_value);
+//			printf("value of the read-in: %d\n", int_value);
+//			tcflush(fd, TCIFLUSH);
 
 			return int_value;
 	//}

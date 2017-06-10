@@ -1,46 +1,41 @@
 
-
 #include <pthread.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-//#include <math.h>
+#include <math.h>
+#include <time.h>
 
-//#include <wiringPi.h>
+#include <wiringPi.h>
 #include "light_control.h"
 
 
 void light_on(void)
-{/*
+{
 	digitalWrite(LEDPin1, HIGH);
 	digitalWrite(LEDPin2, HIGH);
 	digitalWrite(LEDPin3, HIGH);
-*/
 	printf("light ON\n");
 }
 
 
 void light_off(void)
 {
-	/*
 	digitalWrite(LEDPin1, LOW);
 	digitalWrite(LEDPin2, LOW);
 	digitalWrite(LEDPin3, LOW);
-	*/
 	printf("light OFF\n");
 }
-/*
+
 void init(void)
 {
 	wiringPiSetup();
-
 	pinMode(LEDPin1, OUTPUT);
 	pinMode(LEDPin2, OUTPUT);
 	pinMode(LEDPin3, OUTPUT);
 }
-*/
 
 float request_temperature(void)
 {
@@ -57,10 +52,7 @@ float request_temperature(void)
 	}
 
 	while (fgets(buf, BUFSIZE, fp) != NULL) {
-				//printf("OUTPUT: %s", buf);
 		tempValue = atof(buf);
-		printf("%.1f\n", tempValue);
-
 	}
 
 	if(pclose(fp))  {
@@ -87,17 +79,13 @@ int request_motion(void)
 	}
 
 	while (fgets(buf, BUFSIZE, fp) != NULL) {
-				//printf("OUTPUT: %s", buf);
 		motionState = atoi(buf);
-		printf("what got from pipe: %d\n", motionState);
-
 	}
 
 	if(pclose(fp))  {
 		printf("Command not found or exited with error status\n");
 		return -1;
 	}
-
 	return motionState;
 }	//EOF
 
@@ -106,49 +94,62 @@ int request_motion(void)
 
 int main(void)
 {
-//	init();
-
+	init();
+	struct timespec tstart={0,0}, tend={0,0};
 	float tempValue;
 	float oldTempValue;
-	float tempChange = 1.1;
-	float tempChangeLimit = 10.1;
+	float tempChange ;
+	float tempChangeLimit = 2.5;
 	int motionState;
-	int timeout;
-	int refTimeout = 7;
+	int timeout = 10;
+	int refTimeout = 10;
 	int startup = 1;
 
 	while(1) {
-		//tempValue = request_temperature();
+
+		clock_gettime(CLOCK_MONOTONIC, &tstart);
 		motionState = request_motion();
-		printf("DBG_CTRL --> motionState: %d\n", motionState);
+		clock_gettime(CLOCK_MONOTONIC, &tend);
+		double elapsedTime = (((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
+					((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec)) ;
+
+		printf("RESPONE TIME..: %.5f\n", elapsedTime);
+
+		tempValue = request_temperature();
+		printf("DBG --> tempValue: %.1f\n", tempValue);
+		printf("DBG --> motionState: %d\n", motionState);
 
 		if (startup == 1 && !motionState) {
-			delay(500);
+			delay(1000);
 			oldTempValue = tempValue;
-			tempValue = request_temp();
+			tempValue = request_temperature();
 			startup = 0;
 		}
 
-		tempChange = abs(oldTempValue - tempValue);
+		tempChange = oldTempValue - tempValue;
+        if (tempChange < 0){
+        	tempChange = tempChange * (-1);
+        }
+        printf("DBG --> CHANGE...: %.1f\n", tempChange);
 
-		if (motionState == 1 || tempChange >= tempChangeLimit || timeout >= refTimeout){
+		if (motionState == 1 || tempChange >= tempChangeLimit || timeout < refTimeout){
 			light_on();
 			timeout--;
-			printf("DBG_CTRL --> timeout: %d\n", timeout);
-			//delay(50);
+			if (timeout <= 0) {
+				timeout = refTimeout;
+			}
+			printf("DBG --> timeout: %d\n", timeout);
+
 		}
 		else {
 			light_off();
-			timeout = 0;
-			//delay(50);
+			timeout = refTimeout;
 		}
 
-		tempValue = request_temp();
+		tempValue = request_temperature();
 		oldTempValue = tempValue;
 		delay(500);
-
-
-	} //end of while
+	}
 
 	return 0;
 }	//EOF

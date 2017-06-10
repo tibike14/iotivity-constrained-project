@@ -51,8 +51,6 @@ int serialOpen (const char *device, const int baud)
 
   fcntl (fd, F_SETFL, O_RDWR) ;
 
-// Get and modify current options:
-
   tcgetattr (fd, &options) ;
 
     cfmakeraw   (&options) ;
@@ -69,7 +67,7 @@ int serialOpen (const char *device, const int baud)
 	options.c_cflag &= ~HUPCL;
 
     options.c_cc [VMIN]  =   0 ;
-    options.c_cc [VTIME] = 100 ;        // Ten seconds (100 deciseconds)
+    options.c_cc [VTIME] = 100 ;
 
   tcsetattr (fd, TCSANOW | TCSAFLUSH, &options) ;
 
@@ -105,34 +103,23 @@ float serialReadTemp(void)
 	int nw;
 	int adc_value;
 
-    if ((fd = serialOpen ("/dev/ttyUSB1", 115200)) < 0)
+    if ((fd = serialOpen ("/dev/ttyUSB0", 115200)) < 0)
     {
 	    fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
         return 1 ;
     }
 
     tcflush(fd, TCIFLUSH);
-
     nw = write(fd, "r", 1);
 	printf("number of writes: %d\n", nw); 
-
 	usleep(3000);
-
     n = read(fd, buf, 4);
-
 	adc_value = atoi(buf);
-	printf("the ADC value of temp: %d\n", adc_value);
-	
-	float voltage = adc_value / 204.8;
-	printf("votlage: %.2f\n", voltage);	
 
-	float temperatureC = (voltage - 0.5) * 100 ; // Converting to Celsius
-	printf("Temperature: %.2f\n", temperatureC);	
-
+	float millivolts= (adc_value/1024.0) * 5000;
+	float temperatureC= millivolts/10;
 
 	close(fd);
-
 	return temperatureC;
-
 }
 

@@ -51,33 +51,22 @@ app_init(void)
 #define MAX_URI_LENGTH (30)
 static char motion_1[MAX_URI_LENGTH];
 static oc_server_handle_t motion_sensor;
-static bool motion_state;
+int motion_state = -1;
 
 static oc_string_t name;
 
 
 
-static oc_event_callback_retval_t
-stop_observe(void *data)
-{
-  (void)data;
-//  PRINT("Stopping OBSERVE\n");
-  oc_stop_observe(motion_1, &motion_sensor);
-  return DONE;
-}
-
-
 static void
 observe_motion(oc_client_response_t *data)
 {
-//  PRINT("OBSERVE_motion:\n");
   oc_rep_t *rep = data->payload;
   while (rep != NULL) {
 //    PRINT("key %s, value ", oc_string(rep->name));
     switch (rep->type) {
-    case BOOL:
+    case INT:
 //      	PRINT("%d\n", rep->value.boolean);
-      	motion_state = rep->value.boolean;
+      	motion_state = rep->value.integer;
       	break;
 	case STRING:
 //     	PRINT("%s\n", oc_string(rep->value.string));
@@ -101,7 +90,6 @@ discovery(const char *di, const char *uri, oc_string_array_t types,
   (void)di;
   (void)interfaces;
   (void)user_data;
-//	PRINT("discovery start\n");
   int i;
   int uri_len = strlen(uri);
   uri_len = (uri_len >= MAX_URI_LENGTH) ? MAX_URI_LENGTH - 1 : uri_len;
@@ -172,7 +160,6 @@ main(void)
     next_event = oc_main_poll();
     pthread_mutex_lock(&mutex);
     if (next_event == 0) {
-      //pthread_cond_wait(&cv, &mutex);
     	PRINT("%d", motion_state);
     	quit = 1;
     } else {
@@ -181,11 +168,7 @@ main(void)
       pthread_cond_timedwait(&cv, &mutex, &ts);
     }
     pthread_mutex_unlock(&mutex);
-
-    //PRINT("%d", motion_state);
-
   }
-
   oc_main_shutdown();
   return 0;
 }	//EOF
